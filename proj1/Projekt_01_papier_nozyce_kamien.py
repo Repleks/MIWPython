@@ -26,7 +26,8 @@ matrix_computer = np.array([[transition_matrix_computer[states_computer[i]][stat
 
 # Funkcja wybierająca ruch komputera na podstawie macierzy przejść tj. na podstawie swojego poprzedniego wyboru
 def choose_move(player_previous_move):
-    return np.random.choice(states_computer, p=[transition_matrix_computer[player_previous_move][s] for s in states_computer])
+    index = states_computer.index(player_previous_move)
+    return np.random.choice(states_computer, p=matrix_computer[index])
     '''do uzupelnienia'''
 
 ##### GRACZ #####

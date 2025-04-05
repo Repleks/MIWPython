@@ -19,17 +19,36 @@ X_test = np.array([X[_, split:] for _ in range(len(X))])  # Podział danych na z
 
 # Inicjalizacja listy do przechowywania modeli perceptronów i trenowanie ich
 models = []
+
+# 1 One-vs-All
+# for i in range(4):
+#     y_train = np.where(np.arange(4) == i, 1, -1).repeat(split) # wektor etykiet klasowych dla klasy i [-1, -1, 1, -1] i potem powtórzenie 40 razy
+#     model = Perceptron(n_iterations=500)
+#     model.train(np.vstack(X_train), y_train) # stackowanie tablic w jedną + trenowanie
+#     models.append(model)
+
+# 2 One-vs-One
 for i in range(4):
-    y_train = np.where(np.arange(4) == i, 1, -1).repeat(split) # wektor etykiet klasowych dla klasy i [-1, -1, 1, -1] i potem powtórzenie 40 razy
-    model = Perceptron()
-    model.train(np.vstack(X_train), y_train) # stackowanie tablic w jedną + trenowanie
-    models.append(model)
+    for j in range(i + 1, 4):
+        X_train_ij = np.vstack((X_train[i], X_train[j]))
+        y_train_ij = np.hstack((np.ones(split), -np.ones(split)))
+        model = Perceptron()
+        model.train(X_train_ij, y_train_ij)
+        models.append((model, i, j))
     '''do uzupelnienia'''
 
 # Przewidywanie klas dla danych testowych i obliczanie dokładności
 '''do uzupelnienia'''
+# 1 One-vs-All
+# y_test = np.concatenate([np.full(size_of_data - split, i) for i in range(4)]) # Wektor etykiet klasowych dla danych testowych jako połączenie etykiet klasowych dla wszystkich wektorów
+# y_pred = np.array([model.predict(np.vstack(X_test)) for model in models]).T # Przewidywanie klas dla danych testowych transponowana macierz przewidzianych klas
+# y_pred = np.argmax(y_pred, axis=1) # Przewidywane klasy najbardziej prawdopodobne
+# accuracy = np.mean(y_pred == y_test)
+# print(f'Accuracy: {accuracy:.2f}')
+
+# 2 One-vs-One
 y_test = np.concatenate([np.full(size_of_data - split, i) for i in range(4)]) # Wektor etykiet klasowych dla danych testowych jako połączenie etykiet klasowych dla wszystkich wektorów
-y_pred = np.array([model.predict(np.vstack(X_test)) for model in models]).T # Przewidywanie klas dla danych testowych transponowana macierz przewidzianych klas
+y_pred = np.array([model.predict(np.vstack(X_test)) for model, _, _ in models]).T # Przewidywanie klas dla danych testowych transponowana macierz przewidzianych klas
 y_pred = np.argmax(y_pred, axis=1) # Przewidywane klasy najbardziej prawdopodobne
 accuracy = np.mean(y_pred == y_test)
 print(f'Accuracy: {accuracy:.2f}')
@@ -46,8 +65,8 @@ max_x1 = np.max(X[:,:,0])
 min_x2 = np.min(X[:,:,1])
 max_x2 = np.max(X[:,:,1])
 
-for _ in range(4):
-    [c, a, b] = models[_].weights  # Współczynniki prostej decyzyjnej
+for model, _, _ in models:
+    [c, a, b] = model.weights  # Współczynniki prostej decyzyjnej
     # Zakres dla zmiennej x
     x_range = np.array([min_x1, max_x1])
     # Obliczenie wartości zmiennej y na podstawie równania prostej
