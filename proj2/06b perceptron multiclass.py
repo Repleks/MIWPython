@@ -30,10 +30,10 @@ models = []
 # 2 One-vs-One
 for i in range(4):
     for j in range(i + 1, 4):
-        X_train_ij = np.vstack((X_train[i], X_train[j]))
-        y_train_ij = np.hstack((np.ones(split), -np.ones(split)))
-        model = Perceptron()
-        model.train(X_train_ij, y_train_ij)
+        X_train_ij = np.vstack((X_train[i], X_train[j])) # Łączenie danych treningowych dla klas i i j
+        y_train_ij = np.hstack((np.ones(split), -np.ones(split))) # Łączenie etykiet klasowych dla klas i i j
+        model = Perceptron(n_iterations=1000, learning_rate=0.1)
+        model.train(X_train_ij, y_train_ij) # Trenowanie modelu perceptronu na połączonych danych
         models.append((model, i, j))
     '''do uzupelnienia'''
 
@@ -65,6 +65,18 @@ max_x1 = np.max(X[:,:,0])
 min_x2 = np.min(X[:,:,1])
 max_x2 = np.max(X[:,:,1])
 
+# One vs All
+# for _ in range(4):
+#     [c, a, b] = models[_].weights  # Współczynniki prostej decyzyjnej
+#     # Zakres dla zmiennej x
+#     x_range = np.array([min_x1, max_x1])
+#     # Obliczenie wartości zmiennej y na podstawie równania prostej
+#     y_range = (-a * x_range - c) / b
+#     # Tworzenie wykresu
+#     plt.plot(x_range, y_range, color=colors[_])  # Rysowanie granic decyzyjnych dla każdej klasy # Rysowanie granic decyzyjnych dla każdej klasy
+
+
+# One vs One
 for model, _, _ in models:
     [c, a, b] = model.weights  # Współczynniki prostej decyzyjnej
     # Zakres dla zmiennej x

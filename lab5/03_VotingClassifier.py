@@ -15,19 +15,23 @@ X, y = make_moons(n_samples=10000, noise=0.4, random_state=42)  # Generuje zbió
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)  # Dzieli zbiór danych na zbiory uczący i testowy.
 
 # Krok 3: Tworzenie klasyfikatorów
-svm_clf = '''do uzupełnienia'''  # Tworzy instancję klasyfikatora SVM.
-log_reg_clf = '''do uzupełnienia'''  # Tworzy instancję klasyfikatora regresji logistycznej.
-rf_clf = '''do uzupełnienia'''  # Tworzy instancję klasyfikatora lasu losowego.
+svm_clf =  SVC(random_state=42)  # Tworzy instancję klasyfikatora SVM.
+log_reg_clf = LogisticRegression(random_state=42)  # Tworzy instancję klasyfikatora regresji logistycznej.
+rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)  # Tworzy instancję klasyfikatora lasu losowego.
 
 # Krok 4: Połączenie klasyfikatorów w VotingClassifier
-voting_clf = '''do uzupełnienia'''
+voting_clf = VotingClassifier(estimators=[
+    ('svm', svm_clf),
+    ('log_reg', log_reg_clf),
+    ('rf', rf_clf)
+])
 
 # Krok 5: Trenowanie modelu VotingClassifier
-'''do uzupełnienia'''   # Trenuje model VotingClassifier na danych treningowych.
+voting_clf.fit(X_train, y_train)   # Trenuje model VotingClassifier na danych treningowych.
 
 # Krok 6: Ocena modelu
-train_accuracy = '''do uzupełnienia'''   # Oblicza dokładność modelu na danych treningowych.
-test_accuracy = '''do uzupełnienia'''   # Oblicza dokładność modelu na danych testowych.
+train_accuracy = accuracy_score(y_train, voting_clf.predict(X_train))   # Oblicza dokładność modelu na danych treningowych.
+test_accuracy = accuracy_score(y_test, voting_clf.predict(X_test))    # Oblicza dokładność modelu na danych testowych.
 
 # Krok 7: Rysowanie wyników
 plt.figure(figsize=(10, 10))  # Ustawia rozmiar wykresu.

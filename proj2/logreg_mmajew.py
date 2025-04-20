@@ -9,41 +9,45 @@ class LogisticRegression:
 
     def train(self, X, y):
         n_samples, n_features = X.shape  # Pobiera liczbę próbek i cech
-        self.weights = np.zeros(n_features)  # Inicjalizuje wagi na zero
-        self.bias = 0  # Inicjalizuje obciążenie na zero
+        n_classes = len(np.unique(y))  # Pobiera liczbę klas
+        self.weights = np.zeros((n_features, n_classes))  # Inicjalizuje wagi na zero
+        self.bias = np.zeros(n_classes)  # Inicjalizuje obciążenie na zero
+
+        y_one_hot = np.eye(n_classes)[y]  # One-hot encoding dla y
 
         for _ in range(self.n_iterations):  # Pętla ucząca
             linear_model = np.dot(X, self.weights) + self.bias  # Oblicza model liniowy
-            y_predicted = self.sigmoid(linear_model)  # Przewiduje wartości za pomocą funkcji sigmoidalnej
+            y_predicted = self.softmax(linear_model)  # Przewiduje wartości za pomocą funkcji softmax
 
-            dw = (1 / n_samples) * np.dot(X.T, (y_predicted - y))  # Oblicza gradient wag
-            db = (1 / n_samples) * np.sum(y_predicted - y)  # Oblicza gradient obciążenia
+            dw = (1 / n_samples) * np.dot(X.T, (y_predicted - y_one_hot))  # Oblicza gradient wag
+            db = (1 / n_samples) * np.sum(y_predicted - y_one_hot, axis=0)  # Oblicza gradient obciążenia
 
             self.weights -= self.learning_rate * dw  # Aktualizuje wagi
             self.bias -= self.learning_rate * db  # Aktualizuje obciążenie
 
     def predict(self, X):
         linear_model = np.dot(X, self.weights) + self.bias  # Oblicza model liniowy
-        y_predicted = self.sigmoid(linear_model)  # Przewiduje wartości za pomocą funkcji sigmoidalnej
-        y_predicted_cls = [1 if i > 0.5 else 0 for i in y_predicted]  # Dokonuje klasyfikacji na podstawie progowania
+        y_predicted = self.softmax(linear_model)  # Przewiduje wartości za pomocą funkcji softmax
+        y_predicted_cls = np.argmax(y_predicted, axis=1)  # Dokonuje klasyfikacji na podstawie wartości maksymalnej
         return y_predicted_cls  # Zwraca przewidywane klasy
-    
+
     def predict_probability(self, X):
         linear_model = np.dot(X, self.weights) + self.bias  # Oblicza model liniowy
-        y_predicted = self.sigmoid(linear_model)  # Przewiduje wartości za pomocą funkcji sigmoidalnej
-        return y_predicted  # Zwraca przewidywane klasy
-    
-    def sigmoid(self, x):
-        return 1 / (1 + np.exp(-np.clip(x, -250, 250)))  # Implementacja funkcji sigmoidalnej
+        y_predicted = self.softmax(linear_model)  # Przewiduje wartości za pomocą funkcji softmax
+        return y_predicted  # Zwraca przewidywane prawdopodobieństwa
+
+    def softmax(self, x):
+        exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # Oblicza wykładnik x
+        return exp_x / np.sum(exp_x, axis=1, keepdims=True)  # Zwraca wartości softmax
 
     def accuracy(self, X, y):
         """
         Obliczenie dokładności klasyfikacji na podstawie danych wejściowych i prawdziwych etykiet.
-        
+
         Parametry:
         - X: Dane wejściowe.
         - y: Prawdziwe etykiety klasowe.
-        
+
         Zwraca:
         - Dokładność klasyfikacji jako ułamek.
         """
@@ -74,7 +78,7 @@ def main():
     logisticregression = LogisticRegression(n_iterations=n_iterations)  # Inicjalizuje LogisticRegression z określoną liczbą iteracji
     logisticregression.train(X_train, y_train)  # Trenuje logisticregression na danych treningowych
     accuracy = logisticregression.accuracy(X_test, y_test)  # Oblicza dokładność na danych testowych
-    
+
     # Wyświetlanie danych treningowych i granicy decyzyjnej
     plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train)
     plt.xlabel('Długość płatka')
@@ -88,9 +92,9 @@ def main():
     print(type(Z))
     Z = Z.reshape(xx.shape)  # Zmienia kształt przewidywań
     plt.contourf(xx, yy, Z, alpha=0.4)  # Wyświetla granicę decyzyjną
-    
+
     plt.show()
-    
+
 
 if __name__ == '__main__':
     main()
