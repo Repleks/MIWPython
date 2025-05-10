@@ -20,29 +20,29 @@ class NeuralNetworkRegression:
         # Inicjalizacja historii wartości MSE i R^2
         self.history_mse = []
         self.history_r2 = []
-    
-    def step_function(self, x):
-        # Funkcja aktywacji skokowa
-        return np.where(x >= 0, 1, 0)
-    
-    def step_function_derivative(self, x):
-        # Pochodna funkcji aktywacji skokowej
-        return np.zeros_like(x)
+    # sinus 
+    def sin_function(self, x):
+        # Funkcja aktywacji sinusoidalnej
+        return np.sin(x)
+
+    def sin_function_derivative(self, x):
+        # Pochodna funkcji aktywacji sinusoidalnej
+        return np.cos(x)
     
     def forward(self, X):
         # Przekazanie sygnału przez sieć w kierunku przód
         hidden_input = np.dot(X, self.weights_input_hidden) + self.bias_hidden
-        hidden_output = self.step_function(hidden_input)
+        hidden_output = self.sin_function(hidden_input)
         output_input = np.dot(hidden_output, self.weights_hidden_output) + self.bias_output
-        return self.step_function(output_input)
+        return self.sin_function(output_input)
     
     def backward(self, X, y, output, learning_rate, reg_lambda):
         # Propagacja wsteczna błędu przez sieć
         output_error = y - output
-        hidden_output = self.step_function(np.dot(X, self.weights_input_hidden) + self.bias_hidden)
+        hidden_output = self.sin_function(np.dot(X, self.weights_input_hidden) + self.bias_hidden)
         gradient_hidden_output = np.dot(hidden_output.T, output_error)
         hidden_error = np.dot(output_error, self.weights_hidden_output.T)
-        hidden_error *= self.step_function_derivative(hidden_output)
+        hidden_error *= self.sin_function_derivative(hidden_output)
         gradient_input_hidden = np.dot(X.T, hidden_error)
         # Aktualizacja wag i biasów
         self.weights_hidden_output += (gradient_hidden_output - reg_lambda * self.weights_hidden_output) * learning_rate
@@ -86,11 +86,11 @@ X_train, X_test, y_train, y_test = train_test_split(X_data_normalized, y_data_no
 
 # Inicjalizacja i trenowanie sieci neuronowej
 input_size = 1
-hidden_size = 100
+hidden_size = 50
 output_size = 1
-epochs = 5000
+epochs = 3000
 learning_rate = 0.001
-reg_lambda=0.01
+reg_lambda=0.1
 nn = NeuralNetworkRegression(input_size, hidden_size, output_size)
 nn.train(X_train, y_train, epochs=epochs, learning_rate=learning_rate, reg_lambda=reg_lambda)
 
